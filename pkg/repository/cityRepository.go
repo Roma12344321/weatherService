@@ -24,3 +24,12 @@ func (r *CityRepositoryImpl) SaveCity(city *model.City) error {
 	city.Id = id
 	return nil
 }
+
+func (r *CityRepositoryImpl) GetAllCity() ([]model.City, error) {
+	query := "SELECT * FROM city order by name"
+	var res []model.City
+	if err := r.db.Select(&res, query); err != nil {
+		return nil, err
+	}
+	return res, nil
+}

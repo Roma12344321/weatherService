@@ -9,11 +9,11 @@ import (
 
 type CityService interface {
 	SaveCities(names []string, url string) ([]model.City, error)
+	GetAllCity() ([]model.City, error)
 }
 
 type WeatherService interface {
 	SaveWeatherForeCast([]model.City) ([]model.WeatherForecast, error)
-	SaveForecastForCity(city model.City) ([]model.WeatherForecast, error)
 }
 
 type Service struct {

@@ -27,14 +27,17 @@ func (s *CityServiceImpl) SaveCities(names []string, url string) ([]model.City, 
 	var errs error
 	var wg sync.WaitGroup
 	ch := make(chan model.City)
+	ct, cancel := context.WithTimeout(s.ctx, 10*time.Second)
+	defer cancel()
 	wg.Add(len(names))
 	for _, city := range names {
 		go func(city string) {
 			defer wg.Done()
-			res, err := s.saveOneCity(city, url)
+			res, err := s.saveOneCity(s.ctx, city, url)
 			if err != nil {
 				log.Println(err.Error() + " for " + city)
 				errs = err
+				cancel()
 				return
 			}
 			ch <- res
@@ -44,21 +47,25 @@ func (s *CityServiceImpl) SaveCities(names []string, url string) ([]model.City, 
 		wg.Wait()
 		close(ch)
 	}()
-	for c := range ch {
-		cities = append(cities, c)
+	for {
+		select {
+		case <-ct.Done():
+			if errs != nil {
+				return nil, errs
+			}
+			return nil, ct.Err()
+		case c, ok := <-ch:
+			if !ok {
+				return cities, nil
+			}
+			cities = append(cities, c)
+		}
 	}
-	if errs != nil {
-		return nil, errs
-	}
-	return cities, nil
-
 }
 
-func (s *CityServiceImpl) saveOneCity(city string, url string) (model.City, error) {
-	ct, cancel := context.WithTimeout(s.ctx, 5*time.Second)
-	defer cancel()
+func (s *CityServiceImpl) saveOneCity(ctx context.Context, city string, url string) (model.City, error) {
 	var res []model.City
-	req, err := http.NewRequestWithContext(ct, "GET", url+city, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url+city, nil)
 	if err != nil {
 		return model.City{}, err
 	}
@@ -79,4 +86,8 @@ func (s *CityServiceImpl) saveOneCity(city string, url string) (model.City, erro
 		return model.City{}, err
 	}
 	return res[0], nil
+}
+
+func (s *CityServiceImpl) GetAllCity() ([]model.City, error) {
+	return s.repo.CityRepository.GetAllCity()
 }

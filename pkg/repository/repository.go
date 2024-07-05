@@ -7,6 +7,7 @@ import (
 
 type CityRepository interface {
 	SaveCity(city *model.City) error
+	GetAllCity() ([]model.City, error)
 }
 
 type WeatherRepository interface {

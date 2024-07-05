@@ -3,12 +3,10 @@ package service
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/spf13/viper"
 	"log"
 	"net/http"
-	"strings"
 	"sync"
 	"time"
 	"weatherService/pkg/model"
@@ -27,7 +25,7 @@ func NewWeatherServiceImpl(ctx context.Context, repo *repository.Repository, cli
 
 type weatherResponse struct {
 	List []struct {
-		Dt   string `json:"dt_txt"`
+		Dt   string `json:"dt_txt" db:"dt"`
 		Main struct {
 			Temp      float64 `json:"temp"`
 			FeelsLike float64 `json:"feels_like"`
@@ -70,14 +68,18 @@ func (s *WeatherServiceImpl) SaveWeatherForeCast(cities []model.City) ([]model.W
 	}
 	var wg sync.WaitGroup
 	ch := make(chan []model.WeatherForecast)
+	ct, cancel := context.WithTimeout(s.ctx, 15*time.Second)
+	defer cancel()
+
 	var e error
 	wg.Add(len(cities))
 	for _, city := range cities {
 		go func(city model.City) {
 			defer wg.Done()
-			w, err := s.SaveForecastForCity(city)
+			w, err := s.saveForecastForCity(ct, city)
 			if err != nil {
 				e = err
+				cancel()
 				return
 			}
 			ch <- w
@@ -87,22 +89,27 @@ func (s *WeatherServiceImpl) SaveWeatherForeCast(cities []model.City) ([]model.W
 		wg.Wait()
 		close(ch)
 	}()
-	res := make([]model.WeatherForecast, 0, len(cities)*5)
-	for w := range ch {
-		res = append(res, w...)
+	res := make([]model.WeatherForecast, 0, len(cities)*40)
+	for {
+		select {
+		case <-ct.Done():
+			if e != nil {
+				return nil, e
+			}
+			return nil, ct.Err()
+		case w, ok := <-ch:
+			if !ok {
+				return res, nil
+			}
+			res = append(res, w...)
+		}
 	}
-	if e != nil {
-		return nil, e
-	}
-	return res, nil
 }
 
-func (s *WeatherServiceImpl) SaveForecastForCity(city model.City) ([]model.WeatherForecast, error) {
+func (s *WeatherServiceImpl) saveForecastForCity(ctx context.Context, city model.City) ([]model.WeatherForecast, error) {
 	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/forecast?lat=%f&lon=%f&appid=%s&units=metric",
 		city.Lat, city.Lon, viper.GetString("apikey"))
-	ct, cancel := context.WithTimeout(s.ctx, 5*time.Second)
-	defer cancel()
-	req, err := http.NewRequestWithContext(ct, "GET", url, nil)
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -116,17 +123,10 @@ func (s *WeatherServiceImpl) SaveForecastForCity(city model.City) ([]model.Weath
 	if err != nil {
 		return nil, err
 	}
-	result := make([]model.WeatherForecast, 0, 5)
+	result := make([]model.WeatherForecast, 0, 40)
 	for _, i := range weatherResp.List {
-		if len(result) == 5 {
-			break
-		}
-		t := strings.Split(i.Dt, " ")
-		if len(t) < 2 {
-			return nil, errors.New("incorrect response")
-		}
-		if t[1] == "12:00:00" && isDateGreaterThanToday(t[0]) {
-			date, err := time.Parse("2006-01-02", t[0])
+		if isDateGreaterThanToday(i.Dt) {
+			date, err := time.Parse("2006-01-02 15:04:05", i.Dt)
 			if err != nil {
 				return nil, err
 			}
@@ -149,13 +149,13 @@ func (s *WeatherServiceImpl) SaveForecastForCity(city model.City) ([]model.Weath
 }
 
 func isDateGreaterThanToday(dateStr string) bool {
-	date, err := time.Parse("2006-01-02", dateStr)
+	date, err := time.Parse("2006-01-02 15:04:05", dateStr)
 	if err != nil {
 		log.Printf("Error parsing date: %v", err)
 		return false
 	}
-	currentDate := time.Now().Format("2006-01-02")
-	currentParsedDate, err := time.Parse("2006-01-02", currentDate)
+	currentDate := time.Now().Add(-3 * time.Hour).Format("2006-01-02 15:04:05")
+	currentParsedDate, err := time.Parse("2006-01-02 15:04:05", currentDate)
 	if err != nil {
 		log.Printf("Error parsing current date: %v", err)
 		return false
