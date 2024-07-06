@@ -13,6 +13,7 @@ type CityRepository interface {
 type WeatherRepository interface {
 	DeleteOldDates() error
 	SaveWeatherForeCast(forecast *model.WeatherForecast) error
+	GetWeatherForeCastByCityName(city string) ([]model.WeatherForecast, error)
 }
 
 type Repository struct {

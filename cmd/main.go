@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"github.com/jmoiron/sqlx"
 	"github.com/spf13/viper"
 	"log"
@@ -31,8 +32,7 @@ func main() {
 	services := service.NewService(ctx, repositories, client)
 	schedulers := scheduler.NewScheduler(ctx, services)
 
-	cityUrl := "http://api.openweathermap.org/geo/1.0/direct?limit=1&appid=" + viper.GetString("apikey") + "&q="
-	cities, err := services.CityService.SaveCities(cityArr, cityUrl)
+	cities, err := services.CityService.SaveCities(cityArr)
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
@@ -46,7 +46,7 @@ func main() {
 	handlers := handler.NewHandler(services)
 	server := new(weatherService.Server)
 	go func() {
-		if err := server.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil {
+		if err := server.Run(viper.GetString("port"), handlers.InitRoutes()); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("Failed to run server: %s", err)
 		}
 	}()

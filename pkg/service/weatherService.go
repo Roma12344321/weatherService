@@ -9,6 +9,8 @@ import (
 	"net/http"
 	"sync"
 	"time"
+	"weatherService/pkg/dto"
+	"weatherService/pkg/mapper"
 	"weatherService/pkg/model"
 	"weatherService/pkg/repository"
 )
@@ -161,4 +163,12 @@ func isDateGreaterThanToday(dateStr string) bool {
 		return false
 	}
 	return date.After(currentParsedDate)
+}
+
+func (s *WeatherServiceImpl) GetForecastByCityName(city string) (dto.WeatherDto, error) {
+	forecasts, err := s.repo.WeatherRepository.GetWeatherForeCastByCityName(city)
+	if err != nil {
+		return dto.WeatherDto{}, err
+	}
+	return mapper.MapWeatherForecastListToWeatherDto(forecasts), nil
 }

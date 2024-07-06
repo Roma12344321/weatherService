@@ -15,5 +15,10 @@ func NewHandler(service *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *gin.Engine {
 	router := gin.Default()
+	api := router.Group("/api")
+	{
+		api.GET("/city", h.getAllCity)
+		api.GET("/city/:name", h.getInfoAboutCity)
+	}
 	return router
 }

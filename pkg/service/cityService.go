@@ -4,8 +4,10 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"github.com/spf13/viper"
 	"log"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 	"weatherService/pkg/model"
@@ -22,7 +24,8 @@ func NewCityServiceImpl(ctx context.Context, repo *repository.Repository, client
 	return &CityServiceImpl{ctx: ctx, repo: repo, client: client}
 }
 
-func (s *CityServiceImpl) SaveCities(names []string, url string) ([]model.City, error) {
+func (s *CityServiceImpl) SaveCities(names []string) ([]model.City, error) {
+	url := "http://api.openweathermap.org/geo/1.0/direct?limit=1&appid=" + viper.GetString("apikey") + "&q="
 	cities := make([]model.City, 0, len(names))
 	var errs error
 	var wg sync.WaitGroup
@@ -81,6 +84,7 @@ func (s *CityServiceImpl) saveOneCity(ctx context.Context, city string, url stri
 	if len(res) == 0 {
 		return model.City{}, errors.New("empty response")
 	}
+	res[0].Name = strings.ToLower(res[0].Name)
 	err = s.repo.SaveCity(&res[0])
 	if err != nil {
 		return model.City{}, err

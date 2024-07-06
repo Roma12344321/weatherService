@@ -3,17 +3,19 @@ package service
 import (
 	"context"
 	"net/http"
+	"weatherService/pkg/dto"
 	"weatherService/pkg/model"
 	"weatherService/pkg/repository"
 )
 
 type CityService interface {
-	SaveCities(names []string, url string) ([]model.City, error)
+	SaveCities(names []string) ([]model.City, error)
 	GetAllCity() ([]model.City, error)
 }
 
 type WeatherService interface {
 	SaveWeatherForeCast([]model.City) ([]model.WeatherForecast, error)
+	GetForecastByCityName(city string) (dto.WeatherDto, error)
 }
 
 type Service struct {
