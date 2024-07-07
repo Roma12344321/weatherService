@@ -44,3 +44,14 @@ func (r *WeatherRepositoryImpl) GetWeatherForeCastByCityName(city string) ([]mod
 	}
 	return res, nil
 }
+
+func (r *WeatherRepositoryImpl) GetForecastByCityNameAndDate(city string, date time.Time) (model.WeatherForecast, error) {
+	query := `SELECT weather_forecast.id, weather_forecast.date, weather_forecast.temp, weather_forecast.data, 
+    city.id AS "city.id", city.name AS "city.name", city.country AS "city.country", city.lat AS "city.lat", city.lon AS "city.lon" 
+	FROM weather_forecast LEFT JOIN city ON weather_forecast.city_id = city.id WHERE city.name=$1 AND weather_forecast.date=$2`
+	var res model.WeatherForecast
+	if err := r.db.Get(&res, query, city, date); err != nil {
+		return model.WeatherForecast{}, err
+	}
+	return res, nil
+}

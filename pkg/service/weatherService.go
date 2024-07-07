@@ -25,45 +25,6 @@ func NewWeatherServiceImpl(ctx context.Context, repo *repository.Repository, cli
 	return &WeatherServiceImpl{ctx: ctx, repo: repo, client: client}
 }
 
-type weatherResponse struct {
-	List []struct {
-		Dt   string `json:"dt_txt" db:"dt"`
-		Main struct {
-			Temp      float64 `json:"temp"`
-			FeelsLike float64 `json:"feels_like"`
-			TempMin   float64 `json:"temp_min"`
-			TempMax   float64 `json:"temp_max"`
-			Pressure  int     `json:"pressure"`
-			SeaLevel  int     `json:"sea_level"`
-			GrndLevel int     `json:"grnd_level"`
-			Humidity  int     `json:"humidity"`
-			TempKf    float64 `json:"temp_kf"`
-		} `json:"main"`
-		Weather []struct {
-			Id          int    `json:"id"`
-			Main        string `json:"main"`
-			Description string `json:"description"`
-			Icon        string `json:"icon"`
-		} `json:"weather"`
-		Clouds struct {
-			All int `json:"all"`
-		} `json:"clouds"`
-		Wind struct {
-			Speed float64 `json:"speed"`
-			Deg   int     `json:"deg"`
-			Gust  float64 `json:"gust"`
-		} `json:"wind"`
-		Visibility int     `json:"visibility"`
-		Pop        float64 `json:"pop"`
-		Sys        struct {
-			Pod string `json:"pod"`
-		} `json:"sys"`
-		Rain struct {
-			H float64 `json:"3h"`
-		} `json:"rain,omitempty"`
-	} `json:"list"`
-}
-
 func (s *WeatherServiceImpl) SaveWeatherForeCast(cities []model.City) ([]model.WeatherForecast, error) {
 	if err := s.repo.WeatherRepository.DeleteOldDates(); err != nil {
 		return nil, err
@@ -120,7 +81,7 @@ func (s *WeatherServiceImpl) saveForecastForCity(ctx context.Context, city model
 		return nil, err
 	}
 	defer resp.Body.Close()
-	var weatherResp weatherResponse
+	var weatherResp dto.WeatherResponse
 	err = json.NewDecoder(resp.Body).Decode(&weatherResp)
 	if err != nil {
 		return nil, err
@@ -138,7 +99,7 @@ func (s *WeatherServiceImpl) saveForecastForCity(ctx context.Context, city model
 				Temp:   i.Main.Temp,
 				CityID: city.Id,
 				City:   &city,
-				Data:   string(jsonData),
+				Data:   jsonData,
 			}
 			err = s.repo.WeatherRepository.SaveWeatherForeCast(&w)
 			if err != nil {
@@ -171,4 +132,12 @@ func (s *WeatherServiceImpl) GetForecastByCityName(city string) (dto.WeatherDto,
 		return dto.WeatherDto{}, err
 	}
 	return mapper.MapWeatherForecastListToWeatherDto(forecasts), nil
+}
+
+func (s *WeatherServiceImpl) GetForecastByCityNameAndDate(city string, date time.Time) (model.WeatherForecast, error) {
+	res, err := s.repo.WeatherRepository.GetForecastByCityNameAndDate(city, date)
+	if err != nil {
+		return model.WeatherForecast{}, err
+	}
+	return res, nil
 }
