@@ -2,6 +2,7 @@ package scheduler
 
 import (
 	"context"
+	"github.com/spf13/viper"
 	"log"
 	"time"
 	"weatherService/pkg/service"
@@ -18,6 +19,7 @@ func NewScheduler(ctx context.Context, service *service.Service) *Scheduler {
 
 func (s *Scheduler) Schedule() {
 	go func() {
+		apikey := viper.GetString("apikey")
 		ticker := time.NewTicker(5 * time.Minute)
 		defer ticker.Stop()
 		for {
@@ -30,7 +32,7 @@ func (s *Scheduler) Schedule() {
 					log.Println(err.Error())
 					continue
 				}
-				_, err = s.service.WeatherService.SaveWeatherForeCast(cities)
+				_, err = s.service.WeatherService.SaveWeatherForeCast(cities, apikey)
 				if err != nil {
 					log.Println(err.Error())
 				}

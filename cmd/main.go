@@ -32,11 +32,11 @@ func main() {
 	services := service.NewService(ctx, repositories, client)
 	schedulers := scheduler.NewScheduler(ctx, services)
 
-	cities, err := services.CityService.SaveCities(cityArr)
+	cities, err := services.CityService.SaveCities(cityArr, viper.GetString("apikey"))
 	if err != nil {
 		log.Fatalln(err.Error())
 	}
-	_, err = services.WeatherService.SaveWeatherForeCast(cities)
+	_, err = services.WeatherService.SaveWeatherForeCast(cities, viper.GetString("apikey"))
 	if err != nil {
 		log.Fatalln(err.Error())
 	}

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/spf13/viper"
 	"log"
 	"net/http"
 	"sync"
@@ -25,7 +24,7 @@ func NewWeatherServiceImpl(ctx context.Context, repo *repository.Repository, cli
 	return &WeatherServiceImpl{ctx: ctx, repo: repo, client: client}
 }
 
-func (s *WeatherServiceImpl) SaveWeatherForeCast(cities []model.City) ([]model.WeatherForecast, error) {
+func (s *WeatherServiceImpl) SaveWeatherForeCast(cities []model.City, apikey string) ([]model.WeatherForecast, error) {
 	if err := s.repo.WeatherRepository.DeleteOldDates(); err != nil {
 		return nil, err
 	}
@@ -39,7 +38,7 @@ func (s *WeatherServiceImpl) SaveWeatherForeCast(cities []model.City) ([]model.W
 	for _, city := range cities {
 		go func(city model.City) {
 			defer wg.Done()
-			w, err := s.saveForecastForCity(ct, city)
+			w, err := s.saveForecastForCity(ct, city, apikey)
 			if err != nil {
 				e = err
 				cancel()
@@ -69,9 +68,9 @@ func (s *WeatherServiceImpl) SaveWeatherForeCast(cities []model.City) ([]model.W
 	}
 }
 
-func (s *WeatherServiceImpl) saveForecastForCity(ctx context.Context, city model.City) ([]model.WeatherForecast, error) {
+func (s *WeatherServiceImpl) saveForecastForCity(ctx context.Context, city model.City, apikey string) ([]model.WeatherForecast, error) {
 	url := fmt.Sprintf("https://api.openweathermap.org/data/2.5/forecast?lat=%f&lon=%f&appid=%s&units=metric",
-		city.Lat, city.Lon, viper.GetString("apikey"))
+		city.Lat, city.Lon, apikey)
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
 	if err != nil {
 		return nil, err

@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"github.com/spf13/viper"
 	"log"
 	"net/http"
 	"strings"
@@ -24,8 +23,8 @@ func NewCityServiceImpl(ctx context.Context, repo *repository.Repository, client
 	return &CityServiceImpl{ctx: ctx, repo: repo, client: client}
 }
 
-func (s *CityServiceImpl) SaveCities(names []string) ([]model.City, error) {
-	url := "http://api.openweathermap.org/geo/1.0/direct?limit=1&appid=" + viper.GetString("apikey") + "&q="
+func (s *CityServiceImpl) SaveCities(names []string, apikey string) ([]model.City, error) {
+	url := "http://api.openweathermap.org/geo/1.0/direct?limit=1&appid=" + apikey + "&q="
 	cities := make([]model.City, 0, len(names))
 	var errs error
 	var wg sync.WaitGroup

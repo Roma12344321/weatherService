@@ -10,12 +10,12 @@ import (
 )
 
 type CityService interface {
-	SaveCities(names []string) ([]model.City, error)
+	SaveCities(names []string, apikey string) ([]model.City, error)
 	GetAllCity() ([]model.City, error)
 }
 
 type WeatherService interface {
-	SaveWeatherForeCast([]model.City) ([]model.WeatherForecast, error)
+	SaveWeatherForeCast(cities []model.City, apikey string) ([]model.WeatherForecast, error)
 	GetForecastByCityName(city string) (dto.WeatherDto, error)
 	GetForecastByCityNameAndDate(city string, date time.Time) (model.WeatherForecast, error)
 }
