@@ -30,7 +30,7 @@ func NewAuthServiceImpl(repo *repository.Repository) *AuthServiceImpl {
 }
 
 func (s *AuthServiceImpl) Registration(person model.Person) (int, error) {
-	passwordHash := generatePasswordHash(person.Password)
+	passwordHash := GeneratePasswordHash(person.Password)
 	person.Password = passwordHash
 	id, err := s.repo.PersonRepository.CreatePerson(person)
 	if err != nil {
@@ -44,7 +44,7 @@ func (s *AuthServiceImpl) Registration(person model.Person) (int, error) {
 }
 
 func (s *AuthServiceImpl) GenerateToken(username, password string) (string, error) {
-	user, err := s.repo.GetPersonByUsernameAndPassword(username, generatePasswordHash(password))
+	user, err := s.repo.GetPersonByUsernameAndPassword(username, GeneratePasswordHash(password))
 	if err != nil {
 		return "", err
 	}
@@ -80,7 +80,7 @@ func (s *AuthServiceImpl) ParseToken(accessToken string) (int, error) {
 	return claims.UserId, nil
 }
 
-func generatePasswordHash(password string) string {
+func GeneratePasswordHash(password string) string {
 	hash := sha1.New()
 	hash.Write([]byte(password))
 

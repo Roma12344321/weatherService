@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"context"
@@ -10,12 +10,13 @@ import (
 	"weatherService/pkg/model"
 	"weatherService/pkg/repository"
 	"weatherService/pkg/repository/mocks"
+	"weatherService/pkg/service"
 )
 
 func TestCityService_SaveCities(t *testing.T) {
 	mockCityRepo := new(mocks.CityRepository)
 	client := &http.Client{}
-	cityService := NewCityServiceImpl(context.Background(), &repository.Repository{
+	cityService := service.NewCityServiceImpl(context.Background(), &repository.Repository{
 		CityRepository: mockCityRepo,
 	}, client)
 	names := []string{"moscow", "barcelona"}
@@ -38,7 +39,7 @@ func TestCityService_SaveCities(t *testing.T) {
 func TestCityService_GetAllCity(t *testing.T) {
 	mockCityRepo := new(mocks.CityRepository)
 	client := &http.Client{}
-	cityService := NewCityServiceImpl(context.Background(), &repository.Repository{
+	cityService := service.NewCityServiceImpl(context.Background(), &repository.Repository{
 		CityRepository: mockCityRepo,
 	}, client)
 	cities := []model.City{

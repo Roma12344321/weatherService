@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"context"
@@ -11,13 +11,14 @@ import (
 	"weatherService/pkg/model"
 	"weatherService/pkg/repository"
 	"weatherService/pkg/repository/mocks"
+	"weatherService/pkg/service"
 )
 
 func TestWeatherService_SaveWeatherForeCast(t *testing.T) {
 	mockWeatherRepo := new(mocks.WeatherRepository)
 	mockCityRepo := new(mocks.CityRepository)
 	client := &http.Client{}
-	weatherService := NewWeatherServiceImpl(context.Background(), &repository.Repository{
+	weatherService := service.NewWeatherServiceImpl(context.Background(), &repository.Repository{
 		WeatherRepository: mockWeatherRepo,
 		CityRepository:    mockCityRepo,
 	}, client)
@@ -36,7 +37,7 @@ func TestWeatherService_SaveWeatherForeCast(t *testing.T) {
 func TestWeatherService_GetForecastByCityName(t *testing.T) {
 	mockWeatherRepo := new(mocks.WeatherRepository)
 	client := &http.Client{}
-	weatherService := NewWeatherServiceImpl(context.Background(), &repository.Repository{
+	weatherService := service.NewWeatherServiceImpl(context.Background(), &repository.Repository{
 		WeatherRepository: mockWeatherRepo,
 	}, client)
 	cityName := "city1"
@@ -54,7 +55,7 @@ func TestWeatherService_GetForecastByCityName(t *testing.T) {
 func TestWeatherService_GetForecastByCityNameAndDate(t *testing.T) {
 	mockWeatherRepo := new(mocks.WeatherRepository)
 	client := &http.Client{}
-	weatherService := NewWeatherServiceImpl(context.Background(), &repository.Repository{
+	weatherService := service.NewWeatherServiceImpl(context.Background(), &repository.Repository{
 		WeatherRepository: mockWeatherRepo,
 	}, client)
 	cityName := "city1"

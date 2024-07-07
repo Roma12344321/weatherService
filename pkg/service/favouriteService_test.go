@@ -1,10 +1,11 @@
-package service
+package service_test
 
 import (
 	"testing"
 	"weatherService/pkg/model"
 	"weatherService/pkg/repository"
 	"weatherService/pkg/repository/mocks"
+	"weatherService/pkg/service"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -12,7 +13,7 @@ import (
 func TestFavouriteService_AddCityToFavourite(t *testing.T) {
 	mockCityRepo := new(mocks.CityRepository)
 	mockFavRepo := new(mocks.FavouriteRepository)
-	favouriteService := NewFavouriteServiceImpl(&repository.Repository{
+	favouriteService := service.NewFavouriteServiceImpl(&repository.Repository{
 		CityRepository:      mockCityRepo,
 		FavouriteRepository: mockFavRepo,
 	})
@@ -29,7 +30,7 @@ func TestFavouriteService_AddCityToFavourite(t *testing.T) {
 
 func TestFavouriteService_GetAllFavouriteCity(t *testing.T) {
 	mockFavRepo := new(mocks.FavouriteRepository)
-	favouriteService := NewFavouriteServiceImpl(&repository.Repository{
+	favouriteService := service.NewFavouriteServiceImpl(&repository.Repository{
 		FavouriteRepository: mockFavRepo,
 	})
 	personId := 1

@@ -35,7 +35,7 @@ func (r *CityRepositoryImpl) GetAllCity() ([]model.City, error) {
 }
 
 func (r *CityRepositoryImpl) GetByName(name string) (model.City, error) {
-	query := "SELECT * FROM city where name=$1"
+	query := "SELECT * FROM city WHERE name=$1"
 	var res model.City
 	err := r.db.Get(&res, query, name)
 	return res, err

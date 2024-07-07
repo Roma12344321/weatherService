@@ -1,4 +1,4 @@
-package service
+package service_test
 
 import (
 	"github.com/stretchr/testify/assert"
@@ -7,15 +7,16 @@ import (
 	"weatherService/pkg/model"
 	"weatherService/pkg/repository"
 	"weatherService/pkg/repository/mocks"
+	"weatherService/pkg/service"
 )
 
 func TestAuthService_Registration(t *testing.T) {
 	mockPersonRepo := new(mocks.PersonRepository)
-	authService := NewAuthServiceImpl(&repository.Repository{
+	authService := service.NewAuthServiceImpl(&repository.Repository{
 		PersonRepository: mockPersonRepo,
 	})
 	person := model.Person{Username: "user", Password: "password"}
-	hashedPassword := generatePasswordHash(person.Password)
+	hashedPassword := service.GeneratePasswordHash(person.Password)
 	mockPersonRepo.On("CreatePerson", mock.MatchedBy(func(p model.Person) bool {
 		return p.Username == person.Username && p.Password == hashedPassword
 	})).Return(1, nil)
@@ -27,12 +28,12 @@ func TestAuthService_Registration(t *testing.T) {
 
 func TestAuthService_GenerateToken(t *testing.T) {
 	mockPersonRepo := new(mocks.PersonRepository)
-	authService := NewAuthServiceImpl(&repository.Repository{
+	authService := service.NewAuthServiceImpl(&repository.Repository{
 		PersonRepository: mockPersonRepo,
 	})
 	username := "user"
 	password := "password"
-	hashedPassword := generatePasswordHash(password)
+	hashedPassword := service.GeneratePasswordHash(password)
 	person := model.Person{Id: 1, Username: username, Password: hashedPassword}
 	mockPersonRepo.On("GetPersonByUsernameAndPassword", username, hashedPassword).Return(person, nil)
 	token, err := authService.GenerateToken(username, password)
@@ -43,12 +44,12 @@ func TestAuthService_GenerateToken(t *testing.T) {
 
 func TestAuthService_ParseToken(t *testing.T) {
 	mockPersonRepo := new(mocks.PersonRepository)
-	authService := NewAuthServiceImpl(&repository.Repository{
+	authService := service.NewAuthServiceImpl(&repository.Repository{
 		PersonRepository: mockPersonRepo,
 	})
 	username := "user"
 	password := "password"
-	hashedPassword := generatePasswordHash(password)
+	hashedPassword := service.GeneratePasswordHash(password)
 	person := model.Person{Id: 1, Username: username, Password: hashedPassword}
 	mockPersonRepo.On("GetPersonByUsernameAndPassword", username, hashedPassword).Return(person, nil)
 	token, err := authService.GenerateToken(username, password)
