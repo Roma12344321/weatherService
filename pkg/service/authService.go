@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/dgrijalva/jwt-go"
-	"log"
 	"time"
 	"weatherService/pkg/model"
 	"weatherService/pkg/repository"
@@ -34,10 +33,6 @@ func (s *AuthServiceImpl) Registration(person model.Person) (int, error) {
 	person.Password = passwordHash
 	id, err := s.repo.PersonRepository.CreatePerson(person)
 	if err != nil {
-		return 0, err
-	}
-	if err != nil {
-		log.Println("Balance error")
 		return 0, err
 	}
 	return id, nil

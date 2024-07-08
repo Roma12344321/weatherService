@@ -2,6 +2,7 @@ package mapper
 
 import (
 	"sort"
+	"time"
 	"weatherService/pkg/dto"
 	"weatherService/pkg/model"
 )
@@ -14,13 +15,13 @@ func MapWeatherForecastListToWeatherDto(list []model.WeatherForecast) dto.Weathe
 	res.Name = list[0].City.Name
 	res.Country = list[0].City.Country
 	var tempSum float64
+	sort.Slice(list, func(i, j int) bool {
+		return list[i].Date.Before(list[j].Date)
+	})
 	for _, forecast := range list {
 		tempSum += forecast.Temp
-		res.Dates = append(res.Dates, forecast.Date)
+		res.Dates = append(res.Dates, forecast.Date.Format(time.DateTime))
 	}
 	res.AvgTemp = tempSum / float64(len(list))
-	sort.Slice(res.Dates, func(i, j int) bool {
-		return res.Dates[i].Before(res.Dates[j])
-	})
 	return res
 }

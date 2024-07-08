@@ -9,7 +9,8 @@ import (
 func (h *Handler) getAllCity(c *gin.Context) {
 	cities, err := h.service.CityService.GetAllCity()
 	if err != nil {
-		c.JSON(http.StatusBadGateway, err.Error())
+		log.Println(err.Error())
+		c.JSON(http.StatusBadGateway, gin.H{"error": "server error"})
 		return
 	}
 	c.JSON(http.StatusOK, cities)

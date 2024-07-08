@@ -21,7 +21,7 @@ func (h *Handler) addToFavourite(c *gin.Context) {
 	}
 	err = h.service.FavouriteService.AddCityToFavourite(city, personId)
 	if errors.Is(err, sql.ErrNoRows) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "city was not found"})
+		c.JSON(http.StatusNotFound, gin.H{"error": "city was not found"})
 		return
 	}
 	if err != nil {

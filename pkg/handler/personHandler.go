@@ -2,8 +2,8 @@ package handler
 
 import (
 	"errors"
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"log"
 	"net/http"
 	"strings"
 	"weatherService/pkg/model"
@@ -27,7 +27,7 @@ func (h *Handler) createPerson(c *gin.Context) {
 	}
 	id, err := h.service.Registration(model.Person{Username: inputData.Username, Password: inputData.Password})
 	if err != nil {
-		fmt.Println(err)
+		log.Println(err.Error())
 		c.JSON(http.StatusBadRequest, gin.H{"error": err})
 		return
 	}
@@ -54,24 +54,20 @@ func (h *Handler) personIdentity(c *gin.Context) {
 		c.AbortWithStatusJSON(http.StatusBadRequest, "empty auth header")
 		return
 	}
-
 	headerParts := strings.Split(header, " ")
 	if len(headerParts) != 2 || headerParts[0] != "Bearer" {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, "invalid auth header")
 		return
 	}
-
 	if len(headerParts[1]) == 0 {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, "token is empty")
 		return
 	}
-
 	userId, err := h.service.AuthService.ParseToken(headerParts[1])
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, err.Error())
 		return
 	}
-
 	c.Set(personCtx, userId)
 }
 
