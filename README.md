@@ -3,4 +3,5 @@ Set up:
 2) check config.yaml and write your database data
 3) run the command in the console:
   migrate -database postgres://USER:PASSWORD@localhost:5432/DB?sslmode=disable -path migrations up
-4) check swagger docs
+4) check swagger docs:
+  http://localhost:8080/swagger/index.html
