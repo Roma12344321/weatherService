@@ -11,6 +11,7 @@ import (
 	"os/signal"
 	"syscall"
 	"weatherService"
+	_ "weatherService/docs"
 	"weatherService/pkg/handler"
 	"weatherService/pkg/repository"
 	"weatherService/pkg/scheduler"
@@ -18,6 +19,16 @@ import (
 )
 
 var cityArr = []string{"moscow", "london", "warsaw", "berlin", "madrid", "barcelona", "sidney", "canberra"}
+
+// @title Weather Service API
+// @version 1.0
+// @description This is a weather service API documentation.
+// @host localhost:8080
+// @BasePath /
+
+// @securityDefinitions.apikey BearerAuth
+// @in header
+// @name Authorization
 
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())

@@ -19,6 +19,15 @@ type inputUsernameAndPassword struct {
 	Password string `json:"password"`
 }
 
+// @Summary Register a new user
+// @Description Create a new user account
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body inputUsernameAndPassword true "Username and Password"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /auth/registration [post]
 func (h *Handler) createPerson(c *gin.Context) {
 	var inputData inputUsernameAndPassword
 	if err := c.BindJSON(&inputData); err != nil {
@@ -34,6 +43,15 @@ func (h *Handler) createPerson(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"id": id})
 }
 
+// @Summary Login
+// @Description Authenticate user and get a token
+// @Tags auth
+// @Accept json
+// @Produce json
+// @Param input body inputUsernameAndPassword true "Username and Password"
+// @Success 200 {object} map[string]interface{}
+// @Failure 400 {object} map[string]interface{}
+// @Router /auth/login [post]
 func (h *Handler) logIn(c *gin.Context) {
 	var person model.Person
 	if err := c.BindJSON(&person); err != nil {

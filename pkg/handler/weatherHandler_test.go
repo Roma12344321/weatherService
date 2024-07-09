@@ -1,7 +1,6 @@
 package handler
 
 import (
-	"bytes"
 	"encoding/json"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -16,7 +15,8 @@ import (
 
 func TestHandler_getFullInfoAboutCityAndDate(t *testing.T) {
 	mockWeatherService := new(mocks.WeatherService)
-	mockDate, _ := time.Parse(time.DateTime, "2024-07-08 14:00:00")
+	mockDateStr := "2024-07-08T14:00:00Z"
+	mockDate, _ := time.Parse(time.RFC3339, mockDateStr)
 	mockWeather := model.WeatherForecast{
 		Id:     1,
 		Date:   mockDate,
@@ -25,25 +25,24 @@ func TestHandler_getFullInfoAboutCityAndDate(t *testing.T) {
 		CityID: 1,
 		City: &model.City{
 			Id:      1,
-			Name:    "New York",
-			Country: "USA",
+			Name:    "moscow",
+			Country: "Ru",
 		},
 	}
-	mockWeatherService.On("GetForecastByCityNameAndDate", "New York", mockDate).Return(mockWeather, nil)
-	h := &Handler{
+	mockWeatherService.On("GetForecastByCityNameAndDate", "moscow", mockDate).Return(mockWeather, nil)
+	handler := &Handler{
 		service: &service.Service{
 			WeatherService: mockWeatherService,
 		},
 	}
 	r := gin.Default()
-	r.GET("/weather", h.getFullInfoAboutCityAndDate)
-	body, err := json.Marshal(inputCityAndDate{City: "New York", Date: "2024-07-08 14:00:00"})
-	assert.NoError(t, err)
-	req, err := http.NewRequest("GET", "/weather", bytes.NewReader(body))
+	r.GET("/weather", handler.getFullInfoAboutCityAndDate)
+	req, err := http.NewRequest("GET", "/weather?city=moscow&date=2024-07-08T14:00:00Z", nil)
 	assert.NoError(t, err)
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	assert.Equal(t, http.StatusOK, w.Code)
-	assert.JSONEq(t, `{"weather":"sunny"}`, w.Body.String())
+	expectedJSON := `{"weather":"sunny"}`
+	assert.JSONEq(t, expectedJSON, w.Body.String())
 	mockWeatherService.AssertExpectations(t)
 }
