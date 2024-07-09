@@ -18,7 +18,7 @@ import (
 	"weatherService/pkg/service"
 )
 
-var cityArr = []string{"moscow", "london", "warsaw", "berlin", "madrid", "barcelona", "sidney", "canberra"}
+var cityArr = []string{"moscow", "london", "warsaw", "berlin", "madrid", "barcelona", "sidney", "canberra", "toronto", "minsk", "kiev", "amsterdam", "paris", "leon", "rome", "milan", "ankara", "bangkok", "bern", "bratislava"}
 
 // @title Weather Service API
 // @version 1.0
