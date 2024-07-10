@@ -6,6 +6,8 @@ import (
 	"weatherService/pkg/model"
 )
 
+const differenceBetweenUtcAndMoscowTime = -3
+
 type CityRepository interface {
 	SaveCity(city *model.City) error
 	GetAllCity() ([]model.City, error)

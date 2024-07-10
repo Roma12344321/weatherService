@@ -16,7 +16,7 @@ func NewWeatherRepositoryImpl(db *sqlx.DB) *WeatherRepositoryImpl {
 
 func (r *WeatherRepositoryImpl) DeleteOldDates() error {
 	query := "DELETE FROM weather_forecast WHERE date<$1"
-	if _, err := r.db.Exec(query, time.Now().Add(-3*time.Hour)); err != nil {
+	if _, err := r.db.Exec(query, time.Now().Add(differenceBetweenUtcAndMoscowTime*time.Hour)); err != nil {
 		return err
 	}
 	return nil
@@ -39,7 +39,7 @@ func (r *WeatherRepositoryImpl) GetWeatherForeCastByCityName(city string) ([]mod
     city.id AS "city.id", city.name AS "city.name", city.country AS "city.country", city.lat AS "city.lat", city.lon AS "city.lon" 
 	FROM weather_forecast LEFT JOIN city ON weather_forecast.city_id = city.id WHERE city.name=$1 AND weather_forecast.date>$2`
 	var res []model.WeatherForecast
-	if err := r.db.Select(&res, query, city, time.Now().Add(-3*time.Hour)); err != nil {
+	if err := r.db.Select(&res, query, city, time.Now().Add(differenceBetweenUtcAndMoscowTime*time.Hour)); err != nil {
 		return nil, err
 	}
 	return res, nil
